@@ -1,9 +1,5 @@
 # Proteus
 
-[![standard-readme compliant](https://img.shields.io/badge/SE3%20StrcturePrediction%20-init-green.svg?style=plastic&logo=appveyor)](https://github.com/Wangchentong/se3_diffusion)
-[![standard-readme compliant](https://img.shields.io/badge/SE3%20ComplexDiffusion%20-init-green.svg?style=plastic&logo=appveyor)](https://github.com/Wangchentong/se3_diffusion)
-[![standard-readme compliant](https://img.shields.io/badge/SE3%20MoleculeDiffusion-Proposed-inactive.svg?style=plastic&logo=appveyor)](https://github.com/Wangchentong/se3_diffusion)
-
 Implementation for "Proteus: Pioneering Protein Structure Generation for Enhanced Designability and Efficiency"[paper link](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.article-info).
 
 If you use our work then please cite
