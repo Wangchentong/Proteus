@@ -4,7 +4,7 @@
 [![standard-readme compliant](https://img.shields.io/badge/SE3%20ComplexDiffusion%20-init-green.svg?style=plastic&logo=appveyor)](https://github.com/Wangchentong/se3_diffusion)
 [![standard-readme compliant](https://img.shields.io/badge/SE3%20MoleculeDiffusion-Proposed-inactive.svg?style=plastic&logo=appveyor)](https://github.com/Wangchentong/se3_diffusion)
 
-Implementation for "Proteus: Pioneering Protein Structure Generation for Enhanced Designability and Efficiency".
+Implementation for "Proteus: Pioneering Protein Structure Generation for Enhanced Designability and Efficiency"[paper link](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.article-info).
 
 If you use our work then please cite
 ```
@@ -37,7 +37,7 @@ mamba env create -f se3.yml
 
 # activate environment
 conda activate Proteus
-
+```
 ## Inference
 
 
@@ -51,10 +51,12 @@ inference.diffusion.samples.samples_lengths=[100,200,300,400,600,800] \
 inference.diffusion.samples.samples_per_length=100 \
 inference.diffusion.num_t=100
 
-#To disable esmfold prediction and mpnn design, add extra config
+# config below is optional
+
+# To disable esmfold prediction and mpnn design, add extra config
 inference.mpnn.enable=False inference.esmfold.enable=False
 
-#To disable esmfold prediction add extra config
+# To disable esmfold prediction add extra config
 inference.esmfold.enable=False
 ```
 A self_consistency.csv will be generated in the inference_outputs/monomer/${timestap}/self_consistency.csv, report all necessary metrics like dssp or sc-rmsd, etc.
@@ -95,7 +97,7 @@ inference_outputs
          ├── 100_0_sample_esmf_0.pdb     
          ├── 100_0_sample_esmf_0.pdb     # {length}_{sample_id}_sample_esmf_{sequence_id}.pdb
          └── ... 
-
+```
 
 
 
