@@ -1,6 +1,6 @@
 # Proteus
 
-Implementation for "Proteus: Pioneering Protein Structure Generation for Enhanced Designability and Efficiency"[paper link](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.article-info).
+Implementation for "Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency"[paper link](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.article-info).
 
 If you use our work then please cite
 ```
