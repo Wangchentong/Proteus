@@ -1,0 +1,458 @@
+# Default or base configuration for SE(3) diffusion experiments.
+
+defaults:
+  - override hydra/launcher: joblib
+  - override hydra/hydra_logging: disabled
+
+data:
+  # virtual data num of one epoch
+  epoch_length: 10000
+  # max_t shouble set to the same as ${model.strcture2seq.max_t} for efficient training of strcture2seq module.
+  max_t: 1.0
+  min_t: 0.01
+  num_t: 200
+  # freeze strcture to native backbone for strcture2seq lean better from crystal.do not turn on when train scaffold generation.
+  freeze_strcture_ratio: 0.0
+  samples_per_eval_length: 4
+  num_eval_lengths: 5
+  
+  # provide msa feature for condition or diffuse
+  msa: False
+
+  # allowed_oligomer : monomer, dimer, trimer, tetramer(4), pentamer(5), hexamer(6) ... / null for all oligomer type
+  pdb:
+    # metadata of pdb dataset
+    csv_path: ./data/processed_pdb/metadata.csv
+    msa_csv_path: ./data/processed_pdb/metadata_msa.csv
+    assemble_csv_path: null
+    cluster_path: null
+    weight:
+      base: 1.0
+      binder: 0.0
+    filtering:
+      base:
+        path: ./data/pdb/unique_chains.list
+        subset: null
+        allowed_oligomer: null
+        max_len: 512
+        min_len: 40
+        max_helix_percent: 1.0
+        max_loop_percent: 0.5
+        min_beta_percent: -1.0
+        rog_quantile: 0.96
+      binder:
+        subset: null
+        crop_size: 576
+        binder_max_len: 384
+        binder_min_len: 6
+        binder_max_helix_percent: 1.0
+        binder_max_loop_percent: 0.5
+        binder_min_beta_percent: -1.0
+        binder_rog_quantile: 0.96
+        binder_min_contact_residue : 10
+        binder_min_contact_residue_ratio: 0.1
+
+
+  afdb:
+    # metadata of afdb dataset
+    csv_path: null
+    msa_csv_path: null
+    assemble_csv_path: null
+    cluster_path: null
+    weight: 1.0
+    filtering:
+      path: null
+      subset: null
+      allowed_oligomer: null
+      max_len: 512
+      min_len: 60
+      max_helix_percent: 1.0
+      max_loop_percent: 0.5
+      min_beta_percent: -1.0
+      rog_quantile: 0.96
+
+  train:
+    # common setting
+    crop: False
+    crop_size: 512
+    max_templates: null
+    # dynamic sampling config
+    max_squared_res: 250000
+    max_batch_size : 8
+    msa_num: 64
+    # self condition config
+    delta_t_range: [0]
+
+  eval:
+    # common setting
+    crop: False
+    crop_size: null
+    max_templates: null
+    max_batch_size: ${data.samples_per_eval_length}
+    max_squared_res: 300000
+    msa_num: 64
+
+  # config used in strcture prediction/ , not available here
+  max_template_hits: 0
+  max_templates: 0
+  subsample_templates: False
+  shuffle_top_k_prefiltered : 0
+
+interpolant:
+  min_t: ${data.min_t}
+  rots:
+    train_schedule: linear
+    sample_schedule: exp
+    exp_rate: 10
+  trans:
+    train_schedule: linear
+    sample_schedule: linear
+  sampling:
+    num_timesteps: 100
+  self_condition: true
+
+diffuser:
+  diffuse_trans: True
+  diffuse_rot: True
+  diffuse_sequence: False
+
+  # R(3) diffuser arguments
+  r3:
+    min_b: 0.1
+    max_b: 20.0
+    coordinate_scaling: 0.1
+
+  # SO(3) diffuser arguments
+  so3:
+    num_omega: 1000
+    num_sigma: 1000
+    min_sigma: 0.1
+    max_sigma: 1.5
+    schedule: logarithmic
+    cache_dir: .cache/
+    use_cached_score: False
+
+  sequence:
+    blosum_matrix_path: ./data/msa/blosum62-special-MSA.mat
+    total_transition: 200
+    replace_fraction: 0.25
+    uniform_prob: 0.8
+    same_prob: 0.1
+
+model:
+  # an option for analysis memory and time for each block of model
+  profile: False
+  # control if sidechain prediction is used
+  sidechain : False
+  node_embed_size: 256
+  edge_embed_size: 128
+  dropout: 0.0
+  # monomer/multimer
+  # change the behavior of chain_index and residue_index embedding. 
+  # in monomer mode, multiple chain will consider as single chain and sperate by add 64 residue_index_offset
+  mode: monomer
+  embed:
+    feature:
+      aatype: False
+      index: False
+      rel_pos: 32
+      t: 32
+      distogram:
+        min_bin: 1e-5
+        max_bin: 20.0
+        no_bins: 22
+      
+    self_condition:
+      # baseline: ca distogram, template: af2 template feature, null: no self-condition
+      version: template
+      # now aatype process has two way: mask(mask all residue identity),null: same as input,
+      aatype: mask
+      # backbone,all_atom
+      all_atom_mask: backbone
+      # strcture to seq embedding
+      struct2seq:
+        enable: False
+        c_s: ${model.node_embed_size}
+        c_z: ${model.edge_embed_size}
+        temperature: 0.1
+        seq_nums: 4
+        esm_name: esm2_t33_650M_UR50D
+        checkpoint_path: ./ProteinMPNN/ca_model_weights/v_48_020.pt
+        cross_embedder:
+          template_pointwise_attention:
+            c_t: ${model.embed.self_condition.struct2seq.c_z}
+            c_z: ${model.edge_embed_size}
+            c_hidden: 32
+            no_heads: 4
+            inf: 1e9
+          template_column_wise_attention:
+            c_in: ${model.embed.self_condition.struct2seq.c_s}
+            c_hidden: 64
+            no_heads : 4
+
+    node_embed_size: ${model.node_embed_size}
+    edge_embed_size: ${model.edge_embed_size}
+    inf: 1e9
+    eps: 1e-6
+
+    template:
+      c_s: ${model.node_embed_size}
+      c_z: ${model.edge_embed_size}
+      c_t: 64
+      inf: 1e9
+      eps: 1e-6
+
+      distogram:
+        min_bin: 3.25
+        max_bin: 50.75
+        no_bins: 39
+      
+      template_angle_embedder:
+        # DISCREPANCY: c_in is supposed to be 51.
+        c_in: 57
+        c_out: ${model.node_embed_size}
+      
+      template_pair_embedder:
+        c_in: 88
+        c_out: ${model.embed.template.c_t}
+      
+      template_pair_stack:
+        c_t: ${model.embed.template.c_t}
+        c_hidden_tri_mul: 32
+        pair_transition_n: 2
+        dropout_rate: 0.25
+        inf: 1e9
+
+      template_cross_embedder:
+        template_pointwise_attention:
+          c_t: ${model.embed.template.c_t}
+          c_z: ${model.edge_embed_size}
+          c_hidden: 16
+          no_heads: 4
+          inf: 1e9
+        template_column_wise_attention:
+          c_in: ${model.node_embed_size}
+          c_hidden: 64
+          no_heads : 4
+  # msa config
+  msa_transformer:
+    enable: False
+    c_s: ${model.node_embed_size}
+    c_msa: 256
+    c_z: ${model.edge_embed_size}
+    c_gate_s: 16
+    c_hidden_msa_att : 64
+    no_heads_msa : 4
+    dropout : 0.1
+    num_blocks : 4
+    n_tokens : 23
+    transition_n : 2
+    inf : 1e9
+    use_flash: False
+    use_ckpt: False
+  
+  ipa:
+    c_s: ${model.node_embed_size}
+    c_z: ${model.edge_embed_size}
+    c_hidden: 256
+    c_skip: 64
+    no_heads: 8
+    no_qk_points: 8
+    no_v_points: 12
+    seq_tfmr_attention: pytorch
+    seq_tfmr_num_heads: 4
+    seq_tfmr_num_layers: 2
+    num_blocks: 4
+    coordinate_scaling: ${diffuser.r3.coordinate_scaling}
+    axial_pair_attention:
+      enable: False # true
+      c_s: ${model.node_embed_size}
+      c_z: ${model.edge_embed_size}
+      c_rbf: 64
+      c_gate_s: 16
+      c_hidden: 64
+      c_hidden_mul: 128
+      no_heads: 4
+      transition_n: 2
+      inf: 1e9
+      pair_dropout: 0.25
+    local_triangle_attention_new:
+      enable: True # true
+      c_s: ${model.node_embed_size}
+      c_z: ${model.edge_embed_size}
+      c_rbf: 64
+      c_gate_s: 16
+      c_hidden: 128
+      c_hidden_mul: 128
+      no_heads: 4
+      transition_n: 2
+      k_neighbour: 32
+      k_linear: 0 #16
+      inf: 1e9
+      pair_dropout: 0.25
+
+  # Auxillary head
+  auxiliary_heads:
+    distogram_6d:
+      dist:
+        c_z : ${model.edge_embed_size}
+        no_bins : 37
+      theta: 
+        c_z : ${model.edge_embed_size}
+        no_bins : 37
+      omega:
+        c_z : ${model.edge_embed_size}
+        no_bins : 37
+      phi:
+        c_z : ${model.edge_embed_size}
+        no_bins : 19
+
+  # strcut2seq model
+  strcture2seq:
+    enable: False
+    # model config
+    n_tokens : 21
+    c_s: 128
+    c_t: 64
+    n_layers: 3
+    n_decoder_layers: 1
+    n_neighbors: 48
+    dropout: 0.1 
+    noise_level: 0.2 # enable only when training
+    crystal_design: False # use when strcture2seq trained with crystal strcture at t = 0
+    esm_adapter : 
+      enable: False
+      model_name : esm2_t30_150M_UR50D 
+      encoder_dim : ${model.strcture2seq.c_s}
+      adapt_attention_heads : 8
+      adapter_layer_indices : [-1]
+      dropout : 0.3
+
+    # sample config
+    min_t: 0.0
+    max_t: 0.35
+    temperature: 1.0
+    num_seqs : 4
+
+loss:
+
+  translation:
+    weight: 1.0
+    t_filter: [0,1]
+
+  rotation:
+    weight: 0.5
+    t_filter: [0.2,1.0]
+    separate_rot_loss: True
+
+  sequence:
+    weight: 1.0
+    t_filter: [0.0,0.35]
+    length_bias: False
+    time_bias: False
+
+  auxillary:
+    weight : 0.25
+
+    backbone_atom:
+      weight: 1.0
+      t_filter: [0,0.2]
+
+    distance_matrix:
+      weight: 1.0
+      t_filter: [0,0.2]
+
+    fape:
+      weight: 0.0
+      t_filter: [0,0]
+
+    violation:
+      weight: 0.0
+      t_filter: [0,0]
+
+    distogram_6d:
+      weight : 0.0
+      t_filter: [0,1.0]
+      dist:
+        min_bin: 2.0
+        max_bin: 20.0
+        no_bins: 37
+        eps: 1e-8
+      theta:
+        min_bin: 0.0
+        max_bin: 360.0
+        no_bins: 37
+        eps: 1e-8
+      omega:
+        min_bin: 0.0
+        max_bin: 360.0
+        no_bins: 37
+        eps: 1e-8
+      phi:
+        min_bin: 0.0
+        max_bin: 180.0
+        no_bins: 19
+        eps: 1e-8
+
+experiment:
+  # Experiment metadata
+  name: baseline
+  run_id: null
+
+  flow_matching_training: False
+  #training mode
+  use_ddp : False
+  ema:
+    enable: False
+    decay: 0.999
+  # Training arguments
+  log_freq: 1000
+  
+  num_loader_workers: 3
+  # The earlier stop threshold between num_epoch and num_step is chosen
+  num_epoch: null
+  num_step: 2000000
+  learning_rate: 0.0001
+  prefetch_factor: 100
+  use_gpu: True
+  num_gpus: 2
+  # seed everything
+  seed : 123456
+
+  # Wandb logging
+  wandb_dir: ./wandb_runs/
+  use_wandb: False
+
+  # How many steps to checkpoint between.
+  ckpt_freq: 100000
+  # Whther overwrite the old checkpoint pth file with newest
+  overwrite_ckpt: False
+  # Take early checkpoint at step 100. Helpful for catching eval bugs early.
+  early_ckpt: False
+
+  # Checkpoint file to warm start from.
+  warm_start: null
+  use_warm_start_conf: False
+  ckpt_dir: ./ckpt/
+
+  coordinate_scaling: ${diffuser.r3.coordinate_scaling}
+  t_normalize_clip: 0.1
+  aux_loss_weight: 0.25
+  
+  # Evaluation.
+  eval_dir: ./eval_outputs
+  noise_scale: 0.1
+  # Filled in during training.
+  num_parameters: null
+  # set freezed part of model during training, used in struc2seq task
+  freeze_strucutre_model: False
+
+hydra:
+  sweeper:
+    params:
+      # Example of hydra multi run and wandb.
+      experiment.name: use_wandb
+      experiment.use_wandb: True
+  output_subdir: null
+  run:  
+    dir: .

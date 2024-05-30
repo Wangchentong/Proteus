@@ -1,0 +1,133 @@
+# Configuration for inference on SE(3) diffusion experiments.
+defaults:
+  - base
+
+inference:
+  name: null
+
+  mode:
+    # select only one mode for following diffusion,sequence design and af2 evaluation pipeline.
+    # default is unconditional monomer generation.[monomer/binder]
+    type : monomer
+
+  timestap : True # This should be turned on if multi-job is submmited with same inference name
+
+  gpu_id: 0  # CUDA GPU to use
+
+  single_process : True # Use single processor, not recommended if use pyrosetta-mpnn protocol becasue of multi-cpu acceleration, but useful for full GPU pipeline or debug
+
+  cpu_num : 8 # Num of cpu use in mpnn-rosetta optimization
+
+  seed: null
+
+  # Directory of software, weights, and outputs.
+  # software and wegiht path use relative path of config directory
+  pt_hub_dir: ./.cache/torch/
+  pmpnn_dir: ./ProteinMPNN/
+  # output file use the relative path of current directory
+  output_dir: ./inference_outputs/
+  summary_csv : ./summary.csv
+
+  # Path to model weights.
+  weights_path: weights/baseline_51636f0.pth
+  sampling_mode: diffusion # diffusion or flow_matching
+
+  interpolant:
+    min_t: 1e-2
+    rots:
+      train_schedule: linear
+      sample_schedule: exp
+      exp_rate: 10
+    trans:
+      train_schedule: linear
+      sample_schedule: linear
+    sampling:
+      num_timesteps: 100
+    self_condition: true
+
+  diffusion:
+    # Number of steps.
+    num_t: 100
+    temperature: 0.1
+    rate_t_esm_condition: 0.2
+    rate_t_esm_seq_nums: 4
+    # sampling temperature of coordinate and rotation
+    noise_scale: 0.1
+    # sampling temperature of msa aatype
+    msa_num: 64
+    # Final t.
+    min_t: 0.01
+
+    samples:
+      prefix: ''
+
+      contigs: null
+
+      ref_pdb: null
+
+      # configs for binder design
+      hotspot: null
+
+      sample_nums: 200
+
+      samples_lengths: null # [100,200,300..] if null, use linspace(min_length, max_length, length_step)
+      # Number of backbone samples per sequence length.
+      samples_per_length: 200
+      # Minimum sequence length to sample.
+      min_length: 100
+      # Maximum sequence length to sample.
+      max_length: 300
+      # gap between lengths to sample. i.e. this script will sample all lengths
+      # in range(min_length, max_length, length_step)
+      length_step: 50
+      
+    option:
+      self_consistency : True
+      save_trajactory : False
+      plot : 
+        switch_on : False # set to false to support current flow-matching inference.
+        flip : False
+
+  mpnn : 
+    enable : True
+    mode : ${inference.mode}
+    ####  model setting ####
+    ca_only : True
+    model_name : v_48_020
+    pmpnn_dir : ${inference.pmpnn_dir}
+
+    #### sample setting ####
+    temperature : 0.1
+    backbone_noise : 0.00
+    num_seqs : 8
+
+    #### device setting ####
+    cpus : ${inference.cpu_num}
+    gpu_id : ${inference.gpu_id}
+    cuda : True
+    batch_size : 1
+
+    #### pyrosetta setting ####
+    # Use Pyrosetta to optimize backbone, this should turned to be True first if any optimization below is used
+    pyrosetta: False
+    # Optimize backbone with Rosetta FastDesign protocol before mpnn sequence design
+    fades : False
+    # Optimize backbone with MPNN-FastRelax protocol during mpnn sequence design, require cycle>1
+    cycle : 1
+    # Pick top-1 sequence sort by mpnn score from ${sample_nums} sequence sampled from the same backbone
+    best_selection:
+      sample_nums : 1
+    # dump mpnn structure relaxed by Pyrosetta FastRelax protocol
+    dump : True 
+  
+  chroma_design:
+    enable: False
+    weight_path: /home/caolongxingLab/wangchentong/.cache/torch/hub/chroma/weights.pt
+    num_seqs : 8
+    temperature: 0.01
+    t: 0.5
+    dump : True 
+
+  esmfold:
+    enable: True
+

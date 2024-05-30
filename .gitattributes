@@ -1,0 +1,4 @@
+ckpt/structure_prediction_6d6e1fb.pth filter=lfs diff=lfs merge=lfs -text
+ckpt/baseline_pretrained.ckpt filter=lfs diff=lfs merge=lfs -text
+ckpt/baseline_51636f0.pth filter=lfs diff=lfs merge=lfs -text
+ckpt/baseline_51636f0_afdb.pth filter=lfs diff=lfs merge=lfs -text
