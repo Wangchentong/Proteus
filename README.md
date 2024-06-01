@@ -1,18 +1,17 @@
 # Proteus
 
-Implementation for "Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency"[paper link](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.article-info).
+PyTorch Implementation for [Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.full.pdf).
 
-If you use our work then please cite
-```
-@article {Wang2024proteus,
-	author = {Wang, Chentong and Qu, Yannan and Peng, Zhangzhi and Wang, Yukai and Zhu, Hongli and Chen, Dachuan and Cao, Longxing},
-	title = {Proteus: exploring protein structure generation for enhanced designability and efficiency},
-	year = {2024},
-	doi = {10.1101/2024.02.10.579791},
-	publisher = {Cold Spring Harbor Laboratory},
-	journal = {bioRxiv}
-}
-```
+<a href="https://openreview.net/pdf?id=IckJCzsGVS"><img src="https://img.shields.io/badge/Paper-ICML%202024-green" style="max-width: 100%;"></a>
+<a href="[https://openreview.net/pdf?id=IckJCzsGVS](https://openreview.net/pdf?id=IckJCzsGVS](https://www.biorxiv.org/content/10.1101/2024.02.10.579791v2.full.pdf)"><img src="https://img.shields.io/badge/Preprint-Biorxiv%202024-blue" style="max-width: 100%;"></a>
+
+
+## Overview
+
+**Proteus** is a novel deep diffusion network designed to generate protein backbones with enhanced designability and efficiency. Unlike traditional models that rely on large pre-trained networks for structure prediction, Proteus utilizes graph-based triangle methods and a multi-track interaction network, achieving state-of-the-art performance without the need for pre-training. Our model's capabilities have been validated through comprehensive in silico evaluations and experimental characterizations, demonstrating its potential to significantly advance the field of protein design.
+
+<img width="1023" alt="image" src="https://github.com/Wangchentong/Proteus/assets/59241275/9cd5d387-66c9-4f71-9fa8-6a27cd77a25b">
+
 
 ## Table of Contents
 
@@ -36,10 +35,12 @@ conda activate Proteus
 ```
 ## Inference
 
+The checkpoint is avaiable at `./weights/paper_weights.pt`
 
 #### monomer inference(command used in paper)
 For the first time run, it might be a little slow because of downloading esmfold ckpt 
 ```sh
+weight_path=./weights/paper_weights.pt
 python ./experiments/inference_se3_diffusion.py \
 inference.output_dir=inference_outputs/monomer/ \
 inference.weights_path=$weight_path \
@@ -59,6 +60,7 @@ A self_consistency.csv will be generated in the inference_outputs/monomer/${time
 
 #### oligomer inference
 ```sh
+baseline_weight_path=./weights/paper_weights.pt
 python ./experiments/inference_se3_diffusion.py \
 inference.output_dir=inference_outputs/oligomer/ \
 inference.weights_path=$baseline_weight_path \
@@ -100,3 +102,22 @@ inference_outputs
 ## License
 
 LICENSE: MIT
+
+## Citation
+
+If you use our work then please cite
+```
+@article {Wang2024proteus,
+	author = {Wang, Chentong and Qu, Yannan and Peng, Zhangzhi and Wang, Yukai and Zhu, Hongli and Chen, Dachuan and Cao, Longxing},
+	title = {Proteus: exploring protein structure generation for enhanced designability and efficiency},
+	year = {2024},
+	doi = {10.1101/2024.02.10.579791},
+	publisher = {Cold Spring Harbor Laboratory},
+	journal = {bioRxiv}
+}
+```
+
+## Appreciation
+Proteus is built upon the following codebases, please give them a star if you enjoy Proteus :)
+
+- [FrameDiff](https://github.com/jasonkyuyim/se3_diffusion)
