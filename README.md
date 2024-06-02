@@ -125,5 +125,7 @@ If you use our work then please cite
 ## Appreciation
 Proteus is built upon the following codebases, please give them a star if you enjoy Proteus :)
 
+- [OpenFold](https://github.com/aqlaboratory/openfold)
 - [FrameDiff](https://github.com/jasonkyuyim/se3_diffusion)
+- [ProteinMPNN](https://github.com/dauparas/ProteinMPNN)
 - [Chroma](https://github.com/chroma-core/chroma)
