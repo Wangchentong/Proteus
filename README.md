@@ -97,6 +97,11 @@ inference_outputs
          └── ... 
 ```
 
+## Code Structure
+
+The local triangle attention is implemented below:
+
+https://github.com/Wangchentong/Proteus/blob/71f9eaf336a41c2f2145ed8914bf7e72762bc72f/model/ipa_pytorch.py#L245
 
 
 ## License
@@ -121,3 +126,4 @@ If you use our work then please cite
 Proteus is built upon the following codebases, please give them a star if you enjoy Proteus :)
 
 - [FrameDiff](https://github.com/jasonkyuyim/se3_diffusion)
+- [Chroma](https://github.com/chroma-core/chroma)
