@@ -8,7 +8,7 @@ PyTorch Implementation for [Proteus: Exploring Protein Structure Generation for 
 
 ## Overview
 
-**Proteus** is a novel deep diffusion network designed to generate protein backbones with enhanced designability and efficiency. Unlike traditional models that rely on large pre-trained networks for structure prediction, Proteus utilizes graph-based triangle methods and a multi-track interaction network, achieving state-of-the-art performance without the need for pre-training. Our model's capabilities have been validated through comprehensive in silico evaluations and experimental characterizations, demonstrating its potential to significantly advance the field of protein design.
+**Proteus** is a novel deep diffusion network designed to generate protein backbones with enhanced designability and efficiency. Unlike RFDiffusion which relies on large pre-trained network RosettaFold for structure prediction, Proteus utilizes graph-based triangle methods and a multi-track interaction network, achieving state-of-the-art performance without the need for pre-training. Notably the computation complexity is reduced from O(n^3) to O(n*k^2). Our model's capabilities have been validated through comprehensive in silico evaluations and experimental characterizations, demonstrating its potential to significantly advance the field of protein design.
 
 <img width="1023" alt="image" src="https://github.com/Wangchentong/Proteus/assets/59241275/9cd5d387-66c9-4f71-9fa8-6a27cd77a25b">
 
@@ -56,7 +56,7 @@ inference.mpnn.enable=False inference.esmfold.enable=False
 # To disable esmfold prediction add extra config
 inference.esmfold.enable=False
 ```
-A self_consistency.csv will be generated in the inference_outputs/monomer/${timestap}/self_consistency.csv, report all necessary metrics like dssp or sc-rmsd, etc.
+A self_consistency.csv will be generated in the `inference_outputs/monomer/${timestap}/self_consistency.csv`, report all necessary metrics like dssp or sc-rmsd, etc.
 
 #### oligomer inference
 ```sh
