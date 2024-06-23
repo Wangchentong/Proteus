@@ -112,13 +112,13 @@ LICENSE: MIT
 
 If you use our work then please cite
 ```
-@article {Wang2024proteus,
-	author = {Wang, Chentong and Qu, Yannan and Peng, Zhangzhi and Wang, Yukai and Zhu, Hongli and Chen, Dachuan and Cao, Longxing},
-	title = {Proteus: exploring protein structure generation for enhanced designability and efficiency},
-	year = {2024},
-	doi = {10.1101/2024.02.10.579791},
-	publisher = {Cold Spring Harbor Laboratory},
-	journal = {bioRxiv}
+@article{wang2024proteus,
+  title={Proteus: exploring protein structure generation for enhanced designability and efficiency},
+  author={Wang, Chentong and Qu, Yannan and Peng, Zhangzhi and Wang, Yukai and Zhu, Hongli and Chen, Dachuan and Cao, Longxing},
+  journal={bioRxiv},
+  pages={2024--02},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
 }
 ```
 
