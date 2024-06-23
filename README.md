@@ -32,6 +32,9 @@ mamba env create -f se3.yml
 
 # activate environment
 conda activate Proteus
+
+# install this repo as a local package
+pip install -e .
 ```
 ## Inference
 
